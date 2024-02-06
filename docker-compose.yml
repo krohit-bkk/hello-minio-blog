@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  minio:
+    image: minio/minio
+    platform: linux/arm64
+    container_name: minio-server
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    environment:
+      MINIO_ACCESS_KEY: minioaccesskey
+      MINIO_SECRET_KEY: miniosecretkey
+    volumes:
+      - /Users/kumarrohit/blogging/minio/data:/data
+    command: server /data --console-address ":9090"
+  etl:
+    build:
+      context: .
+      dockerfile: Dockerfile.etl
+    container_name: etl
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - minio

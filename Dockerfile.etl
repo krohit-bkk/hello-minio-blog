@@ -1,0 +1,27 @@
+FROM python:3.11
+
+# Adding JDK - Required for PySpark
+COPY --from=openjdk:8-jre-slim /usr/local/openjdk-8 /usr/local/openjdk-8
+ENV JAVA_HOME /usr/local/openjdk-8
+RUN update-alternatives --install /usr/bin/java java /usr/local/openjdk-8/bin/java 1
+
+# Adding general shell commands 
+# Useful for debugging the container
+RUN apt-get update && apt-get install -y wget vim cron
+RUN echo "alias ll='ls -lrt'" >> ~/.bashrc
+
+WORKDIR /opt/
+
+# Install python libraries
+RUN pip install poetry pyspark boto3
+COPY pyproject.toml /opt/pyproject.toml
+RUN poetry install
+
+# Copying our read/write code
+COPY try_minio_with_python.py try_minio_with_python.py
+RUN chmod +x /opt/try_minio_with_python.py
+
+# Adding sample data in container's local storage
+RUN mkdir -p /opt/sample_data/
+COPY sample_data.csv /opt/sample_data/
+RUN chmod 777 /opt/sample_data/sample_data.csv
