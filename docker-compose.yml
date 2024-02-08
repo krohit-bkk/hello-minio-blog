@@ -14,6 +14,33 @@ services:
     volumes:
       - /Users/kumarrohit/blogging/minio/data:/data
     command: server /data --console-address ":9090"
+
+  spark-master:
+    image: bitnami/spark:3.5.0
+    container_name: spark-master
+    environment:
+      SPARK_MODE: master
+      SPARK_MASTER_WEBUI_PORT: 9080
+      SPARK_MASTER_PORT: 7077
+    ports:
+      - "9080:9080"
+      - "7077:7077"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  spark-worker:
+    image: bitnami/spark:3.5.0
+    container_name: spark-worker
+    environment:
+      SPARK_MODE: worker
+      SPARK_WORKER_WEBUI_PORT: 8081
+      SPARK_WORKER_MEMORY: 3G
+      SPARK_WORKER_CORES: 2
+      SPARK_MASTER_URL: spark://spark-master:7077
+    depends_on:
+      - spark-master  
   etl:
     build:
       context: .
@@ -23,3 +50,5 @@ services:
       - PYTHONUNBUFFERED=1
     depends_on:
       - minio
+      - spark-master 
+      - spark-worker

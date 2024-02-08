@@ -19,9 +19,16 @@ RUN poetry install
 
 # Copying our read/write code
 COPY try_minio_with_python.py try_minio_with_python.py
-RUN chmod +x /opt/try_minio_with_python.py
+COPY try_minio_with_pyspark.py try_minio_with_pyspark.py
+
+COPY try_minio_with_pyspark.py try_minio_with_pyspark.py
+RUN chmod +x /opt/try_minio_with_pyspark.py
 
 # Adding sample data in container's local storage
 RUN mkdir -p /opt/sample_data/
 COPY sample_data.csv /opt/sample_data/
 RUN chmod 777 /opt/sample_data/sample_data.csv
+
+# Get JAR for Spark-S3 integration
+RUN wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
+RUN wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.540/aws-java-sdk-bundle-1.12.540.jar
